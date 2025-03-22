@@ -63,7 +63,7 @@ jobs:
           sed -i 's/$(BPF_DEPENDS)//g' daed/Makefile
 
       - name: Build Packages
-        uses: zouchanggan/openwrt-gh-action-sdk@helloworld
+        uses: sbwml/openwrt-gh-action-sdk@helloworld
         env:
           ARCH: ${{ matrix.arch }}-${{ matrix.tag }}
           FEEDNAME: packages_ci
@@ -79,7 +79,7 @@ jobs:
           path: bin/packages/${{ matrix.arch }}/packages_ci/*.ipk
 
       - name: Upload FTP
-        uses: zouchanggan/FTP-Deploy-Action@master
+        uses: sbwml/FTP-Deploy-Action@master
         with:
           server: ${{ secrets.ftp_address }}
           username: ${{ secrets.ftp_username }}
