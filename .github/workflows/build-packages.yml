@@ -31,7 +31,7 @@ jobs:
           sed -i 's/$(BPF_DEPENDS)//g' daed/Makefile
 
       - name: Build
-        uses: kenzok8/gh-action-sdk@hash
+        uses: sbwml/gh-action-sdk@hash
         env:
           ARCH: ${{ matrix.arch }}-${{ matrix.sdk }}
           FEEDNAME: packages_ci
@@ -44,16 +44,6 @@ jobs:
         with:
           name: ${{ matrix.tag }}-${{ matrix.arch }}
           path: bin/packages/${{ matrix.arch }}/packages_ci/*.ipk
-
-      - name: Upload FTP
-        uses: zouchanggan/FTP-Deploy-Action@master
-        with:
-          server: ${{ secrets.ftp_address }}
-          username: ${{ secrets.ftp_username }}
-          password: ${{ secrets.ftp_password }}
-          server-dir: ${{ matrix.tag }}/${{ matrix.arch }}/
-          local-dir: bin/packages/${{ matrix.arch }}/packages_ci/
-          dangerous-clean-slate: true
 
       - name: Create metadata
         run: |
