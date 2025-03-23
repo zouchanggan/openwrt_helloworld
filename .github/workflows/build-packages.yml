@@ -56,11 +56,11 @@ jobs:
 
       - name: Free disk space
         run: |
-          sudo rm -rf /usr/lib/{jvm,llvm} /usr/local /usr/src/* /var/lib/gems /var/lib/mysql /var/lib/snapd /etc/skel /opt/{microsoft,az,hostedtoolcache,cni,mssql-tools,pipx} /usr/share/{az*,dotnet,swift,miniconda,gradle*,java,kotlinc,ri,sbt} /root/{.sbt,.local,.npm} /usr/libexec/gcc/x86_64-linux-gnu/14 /usr/lib/x86_64-linux-gnu/{*clang*,*LLVM*} /home/linuxbrew
+          sudo rm -rf /usr/lib/{jvm,llvm} /usr/local /usr/src/* /var/lib/gems /var/lib/mysql /var/lib/snapd /etc/skel /opt/{microsoft,az,hostedtoolcache,cni,mssql-tools,pipx} /usr/share/{az*,dotnet,swift,miniconda,gradle*,java,kotlinc,ri,sbt} /root/{.sbt,.local,.npm} /usr/libexec/gcc/x86_64-linux-gnu/14 /usr/lib/x86_64-linux-gnu/{*clang*,*LLVM*} /home/linuxbrew          
 
       - name: Hack daed packages
         run: |
-          sed -i 's/$(BPF_DEPENDS)//g' daed/Makefile
+          sed -i 's/$(BPF_DEPENDS)//g' daed/Makefile          
 
       - name: Build Packages
         uses: sbwml/openwrt-gh-action-sdk@helloworld
@@ -77,6 +77,16 @@ jobs:
         with:
           name: ${{ matrix.tag }}-${{ matrix.arch }}
           path: bin/packages/${{ matrix.arch }}/packages_ci/*.ipk
+
+      - name: Upload FTP
+        uses: sbwml/FTP-Deploy-Action@master
+        with:
+          server: ${{ secrets.ftp_address }}
+          username: ${{ secrets.ftp_username }}
+          password: ${{ secrets.ftp_password }}
+          server-dir: ${{ matrix.tag }}/${{ matrix.arch }}/
+          local-dir: bin/packages/${{ matrix.arch }}/packages_ci/
+          dangerous-clean-slate: true
 
       - name: Create metadata
         run: |
