@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    name: build ${{ matrix.arch }}-${{ matrix.sdk }}
+    name: build ${{ matrix.arch }}-${{ matrix.tag }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -27,7 +27,7 @@ jobs:
       - name: Build Packages
         uses: sbwml/openwrt-gh-action-sdk@helloworld
         env:
-          ARCH: ${{ matrix.arch }}-${{ matrix.tag }}
+          ARCH: ${{ matrix.arch }}-${{ matrix.sdk }}
           FEEDNAME: packages_ci
           PACKAGES: chinadns-ng daed dns2socks dns2tcp geoview hysteria ipt2socks lua-neturl luci-app-daed luci-app-homeproxy luci-app-nikki luci-app-openclash luci-app-passwall luci-app-passwall2 luci-app-ssr-plus microsocks naiveproxy pdnsd redsocks2 shadow-tls shadowsocks-libev shadowsocks-rust shadowsocksr-libev simple-obfs sing-box tcping trojan trojan-plus tuic-client v2ray-core v2ray-geodata v2ray-plugin xray-core xray-plugin
           KEY_BUILD: ${{ secrets.sign_key }}
