@@ -14,37 +14,6 @@ jobs:
       matrix:
         arch:
           - aarch64_cortex-a53
-          - aarch64_cortex-a72
-          - aarch64_cortex-a76
-          - aarch64_generic
-          - arm_arm1176jzf-s_vfp
-          - arm_arm926ej-s
-          - arm_cortex-a15_neon-vfpv4
-          - arm_cortex-a5_vfpv4
-          - arm_cortex-a7
-          - arm_cortex-a7_neon-vfpv4
-          - arm_cortex-a7_vfpv4
-          - arm_cortex-a8_vfpv3
-          - arm_cortex-a9
-          - arm_cortex-a9_neon
-          - arm_cortex-a9_vfpv3-d16
-          - arm_fa526
-          - arm_xscale
-          - armeb_xscale
-          - i386_pentium-mmx
-          - i386_pentium4
-          - loongarch64_generic
-          - mips64_mips64r2
-          - mips64_octeonplus
-          - mips64el_mips64r2
-          - mips_24kc
-          - mips_4kec
-          - mips_mips32
-          - mipsel_24kc
-          - mipsel_24kc_24kf
-          - mipsel_74kc
-          - mipsel_mips32
-          - riscv64_riscv64
           - x86_64
         tag:
           - openwrt-24.10
@@ -78,17 +47,30 @@ jobs:
           name: ${{ matrix.tag }}-${{ matrix.arch }}
           path: bin/packages/${{ matrix.arch }}/packages_ci/*.ipk
 
-      - name: Upload FTP
-        uses: sbwml/FTP-Deploy-Action@master
-        with:
-          server: ${{ secrets.ftp_address }}
-          username: ${{ secrets.ftp_username }}
-          password: ${{ secrets.ftp_password }}
-          server-dir: ${{ matrix.tag }}/${{ matrix.arch }}/
-          local-dir: bin/packages/${{ matrix.arch }}/packages_ci/
-          dangerous-clean-slate: true
-
-      - name: Create metadata
+      - name: Zip packages
         run: |
-          sshpass -p ${{ secrets.server_password }} ssh -o StrictHostKeyChecking=no root@${{ secrets.ftp_address }} >/dev/null 2>&1
-          sshpass -p ${{ secrets.server_password }} ssh root@${{ secrets.ftp_address }} "/opt/sbin/opkg-sign ${{ matrix.tag }} ${{ matrix.arch }}"
+          zip -j ${{ matrix.arch }}-${{ matrix.tag }}.zip bin/packages/${{ matrix.arch }}/packages_ci/*.ipk
+          echo -e "**文件说明** 🎈:\n" >> release.txt
+          echo -e "1. 默认ssr与passwall的插件与依赖整合包\n" >> release.txt
+          echo -e "2. 使用方法：将整合包上传到openwrt设备的tmp目录，输入命令 \`opkg install *.ipk\`\n" >> release.txt
+          echo -e "3. 默认压缩包里包含ssr passwall bypass passwall2 插件\n" >> release.txt
+          echo -e "4. 如果单独安装ssr与依赖，\`rm -rf {*passwall*,*bypass*,*homeproxy*}\`\n" >> release.txt
+          
+      - name: Upload packages
+        uses: ncipollo/release-action@main
+        with:
+          token: ${{ secrets.ACCESS_TOKEN }}
+          artifacts: "${{ matrix.arch }}-${{ matrix.tag }}.zip,bin/packages/${{ matrix.arch }}/packages_ci/*.ipk"
+          allowUpdates: true
+          replacesArtifacts: true
+          bodyFile: "release.txt"
+          tag: ${{ github.run_number }}-${{ matrix.arch }}
+
+      - name: Delete workflow runs
+        uses: Mattraks/delete-workflow-runs@main
+        with:
+          retain_days: 10
+          keep_minimum_runs: 2
+    
+      - name: Remove old Releases
+        uses: dev-drprasad/delete-older-rel
