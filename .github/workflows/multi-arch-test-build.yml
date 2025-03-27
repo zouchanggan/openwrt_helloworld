@@ -4,7 +4,7 @@ name: Test Build
 on:
   pull_request:
     paths-ignore:
-      - '**.md'
+      - 'Build'
 
 jobs:
   build:
