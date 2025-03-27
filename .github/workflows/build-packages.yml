@@ -16,7 +16,7 @@ jobs:
         arch:
           - aarch64_cortex-a53
           - x86_64
-        sdk:
+        tag:
           - openwrt-24.10
 
     steps:
@@ -25,7 +25,7 @@ jobs:
           fetch-depth: 0
 
       - name: Build Packages
-        uses: zouchanggan/gh-action-sdk@hash
+        uses: sbwml/gh-action-sdk@hash
         env:
           ARCH: ${{ matrix.arch }}-${{ matrix.sdk }}
           FEEDNAME: packages_ci
